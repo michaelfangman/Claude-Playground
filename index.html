@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>iPhone Storage Cleanup</title>
+    <style>
+        :root {
+            --bg: #f2f2f7;
+            --card-bg: #ffffff;
+            --text-primary: #1c1c1e;
+            --text-secondary: #6e6e73;
+            --accent: #007aff;
+            --accent-light: #e5f0ff;
+            --green: #34c759;
+            --green-light: #e8f9ed;
+            --orange: #ff9500;
+            --orange-light: #fff4e5;
+            --red: #ff3b30;
+            --separator: #e5e5ea;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000000;
+                --card-bg: #1c1c1e;
+                --text-primary: #ffffff;
+                --text-secondary: #8e8e93;
+                --accent: #0a84ff;
+                --accent-light: #0a2a4a;
+                --green: #30d158;
+                --green-light: #0a2a12;
+                --orange: #ff9f0a;
+                --orange-light: #2a1a00;
+                --separator: #38383a;
+                --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        .screen {
+            display: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: 24px 0 48px;
+        }
+
+        .screen.active { display: block; }
+
+        /* Welcome */
+        .welcome-icon {
+            font-size: 72px;
+            text-align: center;
+            margin: 40px 0 16px;
+            line-height: 1;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: -0.5px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 28px;
+        }
+
+        .feature-list {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 28px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 15px 16px;
+            border-bottom: 1px solid var(--separator);
+        }
+
+        .feature-item:last-child { border-bottom: none; }
+
+        .feature-icon {
+            font-size: 26px;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .feature-text strong {
+            display: block;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+
+        .feature-text span {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: opacity 0.15s;
+            letter-spacing: -0.2px;
+        }
+
+        .btn-primary:active { opacity: 0.8; }
+        .btn-primary:disabled { opacity: 0.4; }
+
+        /* Quiz */
+        .progress-bar {
+            height: 4px;
+            background: var(--separator);
+            border-radius: 2px;
+            margin-bottom: 28px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width 0.35s ease;
+        }
+
+        .question-number {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .question-text {
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+            line-height: 1.3;
+        }
+
+        .question-hint {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 15px 16px;
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: 14px;
+            cursor: pointer;
+            text-align: left;
+            box-shadow: var(--shadow);
+            transition: border-color 0.15s, background 0.15s;
+            width: 100%;
+        }
+
+        .option-btn:active,
+        .option-btn.selected {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .option-icon {
+            font-size: 24px;
+            width: 34px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+
+        .option-label {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .option-sublabel {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 1px;
+        }
+
+        .quiz-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            padding: 14px 20px;
+            background: var(--card-bg);
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--accent);
+            box-shadow: var(--shadow);
+            transition: opacity 0.15s;
+            flex-shrink: 0;
+        }
+
+        .btn-secondary:active { opacity: 0.7; }
+
+        .btn-next { flex: 1; }
+
+        /* Results */
+        .results-header {
+            text-align: center;
+            padding: 28px 0 20px;
+        }
+
+        .results-icon {
+            font-size: 52px;
+            margin-bottom: 10px;
+        }
+
+        .results-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+
+        .results-subtitle {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .savings-badge {
+            display: inline-block;
+            background: var(--green);
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 100px;
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 0 4px;
+            margin: 20px 0 8px;
+        }
+
+        .action-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: opacity 0.3s;
+        }
+
+        .action-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .action-icon-wrap {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9px;
+            flex-shrink: 0;
+            font-size: 20px;
+        }
+
+        .action-icon-wrap.high { background: var(--green-light); }
+        .action-icon-wrap.medium { background: var(--orange-light); }
+        .action-icon-wrap.low { background: var(--accent-light); }
+
+        .action-info { flex: 1; min-width: 0; }
+
+        .action-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .action-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .savings-tag {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 100px;
+        }
+
+        .savings-tag.high  { background: var(--green-light);  color: var(--green);  }
+        .savings-tag.medium { background: var(--orange-light); color: var(--orange); }
+        .savings-tag.low   { background: var(--accent-light); color: var(--accent); }
+
+        .action-effort {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .action-chevron {
+            font-size: 11px;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+
+        .action-card.expanded .action-chevron { transform: rotate(180deg); }
+
+        .action-body {
+            display: none;
+            padding: 0 16px 16px;
+            border-top: 1px solid var(--separator);
+        }
+
+        .action-card.expanded .action-body { display: block; }
+
+        .steps-list {
+            list-style: none;
+            margin-top: 14px;
+        }
+
+        .steps-list li {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .step-num {
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 1px;
+        }
+
+        .done-btn {
+            display: block;
+            width: 100%;
+            margin-top: 14px;
+            padding: 12px;
+            background: var(--green);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+
+        .done-btn:active { opacity: 0.8; }
+
+        .action-card.done {
+            opacity: 0.45;
+        }
+
+        .action-card.done .action-title::after {
+            content: ' ✓';
+            color: var(--green);
+        }
+
+        .done-summary {
+            background: var(--green-light);
+            border-radius: 14px;
+            padding: 20px 16px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .done-summary.visible { display: block; }
+
+        .done-summary-icon { font-size: 36px; margin-bottom: 8px; }
+
+        .done-summary-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--green);
+            margin-bottom: 6px;
+        }
+
+        .done-summary-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .restart-link {
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            font-size: 15px;
+            color: var(--accent);
+            cursor: pointer;
+            padding: 12px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Welcome -->
+<div id="screen-welcome" class="screen active">
+    <div class="container">
+        <div class="welcome-icon">📱</div>
+        <h1>Storage Cleanup</h1>
+        <p class="subtitle">Answer a few questions about how you use your iPhone and get a personalized plan to reclaim space.</p>
+
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-text">
+                    <strong>Personalized to you</strong>
+                    <span>Suggestions based on your actual usage patterns</span>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">📋</div>
+                <div class="feature-text">
+                    <strong>Step-by-step instructions</strong>
+                    <span>Exactly where to tap in Settings for each action</span>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">📊</div>
+                <div class="feature-text">
+                    <strong>Estimated space savings</strong>
+                    <span>Highest-impact actions shown first</span>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-text">
+                    <strong>100% private</strong>
+                    <span>No data leaves your device — runs entirely in your browser</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="startQuiz()">Get Started &rarr;</button>
+    </div>
+</div>
+
+<!-- Quiz -->
+<div id="screen-quiz" class="screen">
+    <div class="container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="question-number" id="question-number"></div>
+        <div class="question-text" id="question-text"></div>
+        <div class="question-hint" id="question-hint"></div>
+        <div class="options-list" id="options-list"></div>
+        <div class="quiz-nav">
+            <button class="btn-secondary" id="btn-back" onclick="goBack()">Back</button>
+            <button class="btn-primary btn-next" id="btn-next" onclick="goNext()" disabled>Next</button>
+        </div>
+    </div>
+</div>
+
+<!-- Results -->
+<div id="screen-results" class="screen">
+    <div class="container">
+        <div class="results-header">
+            <div class="results-icon">🎉</div>
+            <div class="results-title">Your Cleanup Plan</div>
+            <div class="results-subtitle">Highest-impact actions shown first.</div>
+            <div class="savings-badge" id="total-savings-badge"></div>
+        </div>
+
+        <div id="actions-high"></div>
+        <div id="actions-medium"></div>
+        <div id="actions-low"></div>
+
+        <div class="done-summary" id="done-summary">
+            <div class="done-summary-icon">🥳</div>
+            <div class="done-summary-title">Great work!</div>
+            <div class="done-summary-text">You've completed several cleanup actions. Check your progress in <strong>Settings &rarr; General &rarr; iPhone Storage</strong>.</div>
+        </div>
+
+        <div class="restart-link" onclick="restart()">Start over</div>
+    </div>
+</div>
+
+<script>
+const questions = [
+    {
+        id: 'fullness',
+        text: 'How full is your iPhone storage right now?',
+        hint: 'Check: Settings → General → iPhone Storage',
+        options: [
+            { icon: '🔴', label: 'Almost full',    sub: 'Under 5 GB remaining',  value: 'critical' },
+            { icon: '🟡', label: 'Getting low',    sub: '5–15 GB remaining',       value: 'low' },
+            { icon: '🟢', label: 'Somewhat full',  sub: '15–30 GB remaining',      value: 'moderate' },
+        ]
+    },
+    {
+        id: 'photos',
+        text: 'How are your photos & videos backed up?',
+        hint: 'Photos are usually the #1 storage drain',
+        options: [
+            { icon: '☁️',  label: 'iCloud Photos',          sub: 'Synced to Apple’s cloud',     value: 'icloud' },
+            { icon: '🔵', label: 'Google Photos or other',  sub: 'Another cloud backup service', value: 'google' },
+            { icon: '📵', label: 'Not backed up',           sub: 'Only stored on my phone',      value: 'none' },
+            { icon: '🤷', label: 'Not sure',                sub: "Haven't set this up",          value: 'unsure' },
+        ]
+    },
+    {
+        id: 'photo_count',
+        text: 'Roughly how many photos & videos do you have?',
+        hint: 'Photos app → Library → count shown at the bottom',
+        options: [
+            { icon: '📸', label: 'Thousands',   sub: '5,000+',      value: 'many' },
+            { icon: '🖼️', label: 'Hundreds',    sub: '500–5,000',  value: 'some' },
+            { icon: '🤟', label: 'Not many',    sub: 'Under 500',   value: 'few' },
+        ]
+    },
+    {
+        id: 'deleted_photos',
+        text: 'Do you empty the “Recently Deleted” album in Photos?',
+        hint: 'Deleted photos stay for 30 days before auto-clearing',
+        options: [
+            { icon: '❌', label: 'Never thought about it', sub: "Didn't know I had to",   value: 'never' },
+            { icon: '🗑️', label: 'Sometimes',              sub: 'Occasionally clear it',  value: 'sometimes' },
+            { icon: '🧹', label: 'Yes, regularly',          sub: 'I clear it often',       value: 'always' },
+        ]
+    },
+    {
+        id: 'streaming',
+        text: 'Do you download content for offline use?',
+        hint: 'Music, podcasts, Netflix shows, Spotify playlists, etc.',
+        options: [
+            { icon: '🎵', label: 'Yes, quite a bit', sub: 'Lots of downloaded music or video', value: 'heavy' },
+            { icon: '🎧', label: 'A little',         sub: 'Some downloads here and there',     value: 'light' },
+            { icon: '🚫', label: 'Not really',       sub: 'I stream everything live',           value: 'none' },
+        ]
+    },
+    {
+        id: 'messages',
+        text: 'How much do you use iMessage & other messaging apps?',
+        hint: 'Photos and videos shared in chats pile up fast',
+        options: [
+            { icon: '💬', label: 'A lot',       sub: 'Tons of photos & videos shared', value: 'heavy' },
+            { icon: '📨', label: 'Moderately', sub: 'Regular texting, some media',    value: 'moderate' },
+            { icon: '💤', label: 'Not much',   sub: 'Mostly just text',               value: 'light' },
+        ]
+    },
+    {
+        id: 'apps',
+        text: 'Do you have apps you haven’t opened in months?',
+        hint: 'Think games, one-off tools, old social apps',
+        options: [
+            { icon: '📱', label: 'Definitely',    sub: 'Lots of forgotten apps',  value: 'many' },
+            { icon: '🤔', label: 'A few probably', sub: 'Some I’ve forgotten about', value: 'few' },
+            { icon: '✨',      label: 'No',             sub: 'I keep things tidy',       value: 'none' },
+        ]
+    },
+];
+
+let answers = {};
+let currentQ = 0;
+let doneCount = 0;
+
+function startQuiz() {
+    showScreen('quiz');
+    renderQuestion();
+}
+
+function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+    window.scrollTo(0, 0);
+}
+
+function renderQuestion() {
+    const q = questions[currentQ];
+    const total = questions.length;
+
+    document.getElementById('progress-fill').style.width = (currentQ / total * 100) + '%';
+    document.getElementById('question-number').textContent = `Question ${currentQ + 1} of ${total}`;
+    document.getElementById('question-text').textContent = q.text;
+    document.getElementById('question-hint').textContent = q.hint;
+
+    const list = document.getElementById('options-list');
+    list.innerHTML = '';
+    q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn' + (answers[q.id] === opt.value ? ' selected' : '');
+        btn.innerHTML = `
+            <span class="option-icon">${opt.icon}</span>
+            <span>
+                <span class="option-label">${opt.label}</span>
+                <span class="option-sublabel">${opt.sub}</span>
+            </span>`;
+        btn.onclick = () => pick(q.id, opt.value, btn);
+        list.appendChild(btn);
+    });
+
+    const nextBtn = document.getElementById('btn-next');
+    nextBtn.disabled = answers[q.id] === undefined;
+    nextBtn.textContent = currentQ === total - 1 ? 'See My Plan →' : 'Next';
+    document.getElementById('btn-back').style.visibility = currentQ === 0 ? 'hidden' : 'visible';
+}
+
+function pick(qId, value, btn) {
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    answers[qId] = value;
+    document.getElementById('btn-next').disabled = false;
+}
+
+function goNext() {
+    if (currentQ < questions.length - 1) { currentQ++; renderQuestion(); }
+    else showResults();
+}
+
+function goBack() {
+    if (currentQ > 0) { currentQ--; renderQuestion(); }
+}
+
+function restart() {
+    answers = {};
+    currentQ = 0;
+    doneCount = 0;
+    showScreen('welcome');
+}
+
+// ---- Actions ----
+const allActions = [
+    {
+        id: 'recently_deleted',
+        icon: '🗑️',
+        title: 'Empty the Recently Deleted album',
+        savings: 'Instant — could be several GB',
+        savingsLevel: 'high',
+        effort: '30 seconds',
+        steps: [
+            'Open the <strong>Photos</strong> app.',
+            'Tap <strong>Albums</strong> at the bottom of the screen.',
+            'Scroll down to <strong>Utilities</strong> and tap <strong>Recently Deleted</strong>.',
+            'Tap <strong>Select</strong> in the top-right, then <strong>Delete All</strong> in the bottom-left.',
+            'Confirm. Space is freed immediately.',
+        ],
+        show: a => a.deleted_photos !== 'always',
+        priority: 1,
+    },
+    {
+        id: 'optimize_icloud',
+        icon: '☁️',
+        title: 'Turn on iCloud Photos with Optimize Storage',
+        savings: '5–30+ GB',
+        savingsLevel: 'high',
+        effort: '2 minutes to set up',
+        steps: [
+            'Open <strong>Settings</strong> and tap your name at the top.',
+            'Tap <strong>iCloud → Photos</strong>.',
+            'Enable <strong>Sync this iPhone</strong> (iCloud Photos).',
+            'Choose <strong>Optimize iPhone Storage</strong> — full-resolution photos live in iCloud; your phone stores smaller previews.',
+            'Connect to Wi-Fi and leave the app open for a while. The initial upload can take hours depending on your library size.',
+            'You may need to upgrade your iCloud storage plan (50 GB is $0.99/mo).',
+        ],
+        show: a => a.photos === 'icloud' && a.photo_count !== 'few',
+        priority: 2,
+    },
+    {
+        id: 'setup_icloud',
+        icon: '☁️',
+        title: 'Set up iCloud Photos to offload your library',
+        savings: '5–30+ GB',
+        savingsLevel: 'high',
+        effort: '5 minutes to set up',
+        steps: [
+            'Open <strong>Settings</strong> and tap your name at the top.',
+            'Tap <strong>iCloud → Photos</strong> and enable <strong>Sync this iPhone</strong>.',
+            'Select <strong>Optimize iPhone Storage</strong>.',
+            'Check your iCloud storage: Settings → [Your Name] → iCloud. Upgrade if needed (50 GB = $0.99/mo).',
+            'Stay on Wi-Fi until the upload completes — then your phone will swap full-res photos for previews automatically.',
+        ],
+        show: a => (a.photos === 'none' || a.photos === 'unsure') && a.photo_count !== 'few',
+        priority: 2,
+    },
+    {
+        id: 'google_free_up',
+        icon: '🔵',
+        title: 'Use Google Photos to free up local copies',
+        savings: '5–30+ GB',
+        savingsLevel: 'high',
+        effort: '5 minutes',
+        steps: [
+            'Make sure Google Photos is installed and your library is fully backed up (open the app and confirm “Backup is on”).',
+            'Tap your profile photo in the top-right corner.',
+            'Tap <strong>Free up space on this device</strong>.',
+            'Google Photos will delete locally-stored photos that are safely backed up to the cloud.',
+            'Note: Google accounts include 15 GB free; additional storage starts at $2.99/mo for 100 GB.',
+        ],
+        show: a => a.photos === 'google' && a.photo_count !== 'few',
+        priority: 2,
+    },
+    {
+        id: 'duplicates',
+        icon: '🔁',
+        title: 'Delete duplicate photos & videos',
+        savings: '500 MB – 5 GB',
+        savingsLevel: 'high',
+        effort: '5–15 minutes',
+        steps: [
+            'Open the <strong>Photos</strong> app and tap <strong>Albums</strong>.',
+            'Scroll to <strong>Utilities</strong> and tap <strong>Duplicates</strong> (requires iOS 16+).',
+            'Review each duplicate pair and tap <strong>Merge</strong> to keep the highest-quality version.',
+            'After merging, empty the Recently Deleted album again to fully reclaim the space.',
+        ],
+        show: a => a.photo_count === 'many' || a.photo_count === 'some',
+        priority: 3,
+    },
+    {
+        id: 'streaming_downloads',
+        icon: '🎵',
+        title: 'Remove offline downloads from streaming apps',
+        savings: '1–10+ GB',
+        savingsLevel: 'high',
+        effort: '5 minutes',
+        steps: [
+            '<strong>Spotify:</strong> Tap Home → Settings → Storage → Delete Cache. Then open any downloaded playlist/album and tap the download icon to remove it.',
+            '<strong>Apple Music:</strong> Settings → Apps → Music → Downloaded Music → Edit → delete what you don’t need offline.',
+            '<strong>Netflix:</strong> Open the app → More (…) → App Settings → Delete All Downloads.',
+            '<strong>Podcasts:</strong> Settings → Apps → Podcasts → enable Delete Played Episodes and limit episode downloads.',
+            '<strong>Apple TV+:</strong> Long-press a downloaded item → Remove Download.',
+        ],
+        show: a => a.streaming === 'heavy' || a.streaming === 'light',
+        priority: 4,
+    },
+    {
+        id: 'message_attachments',
+        icon: '💬',
+        title: 'Delete large message attachments',
+        savings: '500 MB – 3 GB',
+        savingsLevel: 'medium',
+        effort: '5 minutes',
+        steps: [
+            'Go to <strong>Settings → General → iPhone Storage</strong>.',
+            'Scroll down and tap <strong>Messages</strong>.',
+            'You’ll see categories: Photos, Videos, GIFs, Stickers, etc. with sizes.',
+            'Tap a category → <strong>Edit</strong> → select items → delete.',
+            'You can also open a conversation in Messages, tap the contact name at the top, then <strong>Photos</strong> or <strong>See All</strong> to bulk-delete from there.',
+        ],
+        show: a => a.messages === 'heavy' || a.messages === 'moderate',
+        priority: 5,
+    },
+    {
+        id: 'message_history',
+        icon: '📅',
+        title: 'Shorten message history',
+        savings: '200 MB – 2 GB',
+        savingsLevel: 'medium',
+        effort: '1 minute',
+        steps: [
+            'Open <strong>Settings → Apps → Messages</strong>.',
+            'Tap <strong>Keep Messages</strong>.',
+            'Change from <strong>Forever</strong> to <strong>1 Year</strong> or <strong>30 Days</strong>.',
+            'Tap <strong>Delete</strong> to confirm — older messages and their attachments are removed automatically.',
+        ],
+        show: a => a.messages === 'heavy' || a.messages === 'moderate',
+        priority: 6,
+    },
+    {
+        id: 'offload_apps',
+        icon: '📲',
+        title: 'Enable automatic app offloading',
+        savings: '500 MB – 5 GB over time',
+        savingsLevel: 'medium',
+        effort: '1 minute to set up',
+        steps: [
+            'Go to <strong>Settings → General → iPhone Storage</strong>.',
+            'Tap <strong>Enable</strong> next to “Offload Unused Apps”.',
+            'iOS will automatically offload apps you haven’t used recently. Your data and documents are kept — just tap the app icon to reinstall whenever you want.',
+        ],
+        show: a => a.apps === 'many' || a.apps === 'few',
+        priority: 7,
+    },
+    {
+        id: 'delete_apps',
+        icon: '🗑️',
+        title: 'Delete apps you no longer use',
+        savings: '200 MB – 3 GB',
+        savingsLevel: 'medium',
+        effort: '5–10 minutes',
+        steps: [
+            'Go to <strong>Settings → General → iPhone Storage</strong>.',
+            'Apps are listed by size. Tap one to see its storage breakdown.',
+            'Tap <strong>Delete App</strong> to fully remove it (vs. Offload, which keeps your data).',
+            'Focus on large games and apps with big “Documents & Data” that you never open.',
+        ],
+        show: a => a.apps === 'many',
+        priority: 8,
+    },
+    {
+        id: 'safari_cache',
+        icon: '🌐',
+        title: 'Clear Safari cache and website data',
+        savings: '100–500 MB',
+        savingsLevel: 'low',
+        effort: '30 seconds',
+        steps: [
+            'Open <strong>Settings → Apps → Safari</strong>.',
+            'Tap <strong>Clear History and Website Data</strong>.',
+            'Tap <strong>Clear History and Data</strong> to confirm.',
+            'Note: you’ll be logged out of websites you’ve visited.',
+        ],
+        show: () => true,
+        priority: 9,
+    },
+    {
+        id: 'app_caches',
+        icon: '🧹',
+        title: 'Clear cached data from heavy apps',
+        savings: '100 MB – 1 GB',
+        savingsLevel: 'low',
+        effort: '5 minutes',
+        steps: [
+            'Go to <strong>Settings → General → iPhone Storage</strong>.',
+            'Look for apps with large “Documents & Data” sections (social media, email, maps are common culprits).',
+            'For apps that support it: tap <strong>Offload App</strong>, then reinstall — this clears the cache while preserving your account login.',
+            'Some apps (Reddit, Instagram, Google Maps) have a “Clear Cache” option in their own settings.',
+        ],
+        show: a => a.fullness === 'critical' || a.fullness === 'low',
+        priority: 10,
+    },
+];
+
+function showResults() {
+    showScreen('results');
+    document.getElementById('done-summary').classList.remove('visible');
+    doneCount = 0;
+
+    let applicable = allActions
+        .filter(a => a.show(answers))
+        .sort((a, b) => a.priority - b.priority);
+
+    // Avoid showing both iCloud setup variants
+    const hasSetup = applicable.some(a => a.id === 'setup_icloud');
+    if (hasSetup) applicable = applicable.filter(a => a.id !== 'optimize_icloud');
+
+    const high   = applicable.filter(a => a.savingsLevel === 'high');
+    const medium = applicable.filter(a => a.savingsLevel === 'medium');
+    const low    = applicable.filter(a => a.savingsLevel === 'low');
+
+    // Rough savings estimate
+    let minGB = 0, maxGB = 0;
+    applicable.forEach(a => {
+        if (a.savingsLevel === 'high')   { minGB += 1; maxGB += 10; }
+        else if (a.savingsLevel === 'medium') { minGB += 0.2; maxGB += 2; }
+        else { minGB += 0.1; maxGB += 0.5; }
+    });
+    document.getElementById('total-savings-badge').textContent =
+        `Estimated: ${Math.round(minGB)}–${Math.round(maxGB)}+ GB recoverable`;
+
+    renderSection('actions-high',   high,   'High Impact',   'high');
+    renderSection('actions-medium', medium, 'Medium Impact', 'medium');
+    renderSection('actions-low',    low,    'Lower Impact',  'low');
+}
+
+function renderSection(containerId, actions, label, level) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    if (!actions.length) return;
+
+    const lbl = document.createElement('div');
+    lbl.className = 'section-label';
+    lbl.textContent = label;
+    el.appendChild(lbl);
+
+    actions.forEach(action => {
+        const card = document.createElement('div');
+        card.className = 'action-card';
+        card.id = 'action-' + action.id;
+        card.innerHTML = `
+            <div class="action-header" onclick="toggle('${action.id}')">
+                <div class="action-icon-wrap ${level}">${action.icon}</div>
+                <div class="action-info">
+                    <div class="action-title">${action.title}</div>
+                    <div class="action-meta">
+                        <span class="savings-tag ${level}">${action.savings}</span>
+                        <span class="action-effort">${action.effort}</span>
+                    </div>
+                </div>
+                <span class="action-chevron">▾</span>
+            </div>
+            <div class="action-body">
+                <ol class="steps-list">
+                    ${action.steps.map(s => `<li><span class="step-num"></span><span>${s}</span></li>`).join('')}
+                </ol>
+                <button class="done-btn" onclick="markDone('${action.id}')">Mark as Done ✓</button>
+            </div>`;
+        el.appendChild(card);
+    });
+
+    // Number the steps
+    el.querySelectorAll('.steps-list').forEach(list => {
+        list.querySelectorAll('.step-num').forEach((n, i) => n.textContent = i + 1);
+    });
+}
+
+function toggle(id) {
+    document.getElementById('action-' + id).classList.toggle('expanded');
+}
+
+function markDone(id) {
+    const card = document.getElementById('action-' + id);
+    if (card.classList.contains('done')) return;
+    card.classList.add('done');
+    card.classList.remove('expanded');
+    doneCount++;
+    if (doneCount >= 2) {
+        document.getElementById('done-summary').classList.add('visible');
+        document.getElementById('done-summary').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+</script>
+</body>
+</html>
